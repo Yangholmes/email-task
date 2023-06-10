@@ -4,7 +4,10 @@
  */
 
 import { EmailListener } from './email-listener';
+import { commands } from './commands';
 
 const emailListener = new EmailListener();
 
-emailListener.start()
+emailListener.start();
+
+emailListener.useCmd(commands);

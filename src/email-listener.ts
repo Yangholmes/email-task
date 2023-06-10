@@ -8,6 +8,7 @@ import { simpleParser } from 'mailparser';
 import dotenv from 'dotenv';
 import { inspect } from 'util';
 import { EventEmitter } from 'events';
+import { Commands } from './commands';
 
 const config = dotenv.config().parsed
 
@@ -64,7 +65,7 @@ export class EmailListener extends EventEmitter {
                   // TODO: 处理收到的内容
                   console.log(res);
                   const { subject, text } = res
-
+                  self.emit(subject, text)
                 });
               });
             });
@@ -92,4 +93,16 @@ export class EmailListener extends EventEmitter {
   public stop() {
     this.imap.end();
   }
+
+  public use() {
+    // TODO: 实现中间件
+  }
+
+  public useCmd(cmds: Commands[]) {
+    const self = this
+    cmds.forEach(cmd => {
+      self.on(cmd.event, cmd.listener)
+    });
+  }
+
 }
