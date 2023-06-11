@@ -10,9 +10,16 @@ import { inspect } from 'util';
 import { EventEmitter } from 'events';
 import { Commands } from './commands';
 
-const config = dotenv.config().parsed
+import env from '../.env'
 
-const { user, password, host, port } = config
+const config = dotenv.parse(env)
+
+const {
+  user,
+  password,
+  imaphost: host,
+  imapport: port
+} = config
 
 export class EmailListener extends EventEmitter {
   private readonly imap: Imap
