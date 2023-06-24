@@ -11,5 +11,11 @@ await esbuild.build({
   outfile: 'dist/index.mjs',
   platform: 'node',
   format: 'esm',
-  packages: 'external'
+  packages: 'external',
+  loader: {
+    '.env': 'text'
+  },
+  alias: {
+    '@': './src'
+  }
 });
