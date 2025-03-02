@@ -3,37 +3,62 @@
  * @author Yangholmes 2023-06-11
  */
 
-import dotenv from 'dotenv'
+import {createTransport} from 'nodemailer';
+import Mail from 'nodemailer/lib/mailer';
+import SMTPPool from 'nodemailer/lib/smtp-pool';
 
-import env from '../.env'
-
-import {createTransport} from 'nodemailer'
-
-const config = dotenv.parse(env)
-
-const {
-  user,
-  password: pass,
-  smtphost: host,
-  smtpport: port
-} = config
-
-const transporter = createTransport({
-  host,
-  port,
-  secure: true,
-  auth: {
-    user,
-    pass
-  },
-});
-
-export function send(subject: string, text?: string, html?: string) {
-  return transporter.sendMail({
-    from: `"我们家的小管家" <${user}>`,
-    to: user,
-    subject,
-    text,
-    html
-  });
+interface Options {
+  user:string;
+  password: string;
+  smtphost: string;
+  smtpport: number;
 }
+
+export class EmialSender {
+  // private readonly options: Options;
+  private readonly transport: Mail;
+
+  constructor(options: Options) {
+    if (!options) {
+      throw new Error('options is required!');
+    }
+    // this.options = options;
+
+    const {
+      user,
+      password,
+      smtphost,
+      smtpport
+    } = options;
+
+    const config: SMTPPool.Options = {
+      pool: true,
+      host: smtphost,
+      port: smtpport,
+      secure: true,
+      auth: {
+        user,
+        pass: password
+      },
+    };
+
+    this.transport = createTransport(config);
+  }
+
+  public send(
+    from: string,
+    to: string,
+    subject: string,
+    text?: string,
+    html?: string
+  ) {
+    return this.transport.sendMail({
+      from,
+      to,
+      subject,
+      text,
+      html
+    });
+  }
+}
+

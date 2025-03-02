@@ -4,10 +4,7 @@
  */
 
 import { EmailListener } from './email-listener';
-import { commands } from './commands';
 
-const emailListener = new EmailListener();
+import { EmialSender } from './email-sender';
 
-emailListener.start();
-
-emailListener.useCmd(commands);
+export { EmailListener, EmialSender };

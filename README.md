@@ -2,12 +2,11 @@
 
 ## 订阅方式
 
-```ts
-app.on(cmd: Command, sub: (options: {[key in string]: string;}) => any)
-```
+TBC...
 
 ## TODO
 
-* [X] 配置加载工具
-* [] 邮件发送
-* [] 日志模块
+* [X] ~~配置加载工具~~
+* [X] 邮件任务监听
+* [X] 邮件发送
+* [ ] 测试

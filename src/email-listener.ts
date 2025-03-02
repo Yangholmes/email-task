@@ -5,32 +5,37 @@
 
 import Imap from 'imap';
 import { simpleParser } from 'mailparser';
-import dotenv from 'dotenv';
 import { inspect } from 'util';
 import { EventEmitter } from 'events';
-import { Commands } from './commands';
 
-import env from '../.env'
+export interface Command {
+  command: string;
+  action: <T>(args: T) => boolean;
+}
 
-const config = dotenv.parse(env)
-
-const {
-  user,
-  password,
-  imaphost: host,
-  imapport: port
-} = config
+interface Options {
+  user: string,
+  password: string,
+  host: string,
+  port: string,
+}
 
 export class EmailListener extends EventEmitter {
-  private readonly imap: Imap
+  private readonly imap: Imap;
+  private readonly options: Options;
 
-  constructor() {
-    super()
-    this.imap = this._setupImap()
+  constructor(options: Options) {
+    if (!options) {
+      throw new Error('options is required!');
+    }
+    super();
+    this.imap = this._setupImap();
+    this.options = options;
   }
 
   private _setupImap() {
-    const self = this
+    const self = this;
+    const { user, password, host, port } = self.options;
     const imap = new Imap({
       user,
       password,
@@ -43,10 +48,10 @@ export class EmailListener extends EventEmitter {
       imap.openBox('INBOX', true, function (err, box) {
         console.log('listening...');
         if (err) {
-          self.emit('error', err)
+          self.emit('error', err);
           throw err;
         }
-        imap.on('mail', (count) => {
+        imap.on('mail', (count: number) => {
           console.log(count);
           const f = imap.seq.fetch(box.messages.total, {
             bodies: '',
@@ -71,8 +76,8 @@ export class EmailListener extends EventEmitter {
                 simpleParser(buffer).then(res => {
                   // TODO: 处理收到的内容
                   console.log(res);
-                  const { subject, text } = res
-                  self.emit(subject, text)
+                  const { subject: action, text } = res;
+                  action && self.emit(action, text);
                 });
               });
             });
@@ -85,9 +90,9 @@ export class EmailListener extends EventEmitter {
           });
           f.on('end', function () {
             console.log('Done fetching all messages!');
-            self.emit('end')
+            self.emit('end');
           });
-        })
+        });
       });
     });
     return imap;
@@ -105,10 +110,10 @@ export class EmailListener extends EventEmitter {
     // TODO: 实现中间件
   }
 
-  public useCmd(cmds: Commands[]) {
-    const self = this
+  public useCmds(cmds: Command[]) {
+    const self = this;
     cmds.forEach(cmd => {
-      self.on(cmd.event, cmd.listener)
+      self.on(cmd.command, cmd.action);
     });
   }
 
