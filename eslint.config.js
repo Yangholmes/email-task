@@ -23,7 +23,10 @@ export default [
       'semi': ['error', 'always'],
       '@typescript-eslint/no-unused-vars': ['warn'],
       'no-undef': ['off'],
-      'no-unused-vars': ['off']
+      'no-unused-vars': ['off'],
+      'object-curly-spacing': ['error', 'always'], // {} 内部两边空格[8,9](@ref)
+      'space-in-parens': ['error', 'never'], // () 内部不留空格[9](@ref)
+      'array-bracket-spacing': ['error', 'never'], // [] 内部不留空格[9](@ref)
     },
   }
 ];

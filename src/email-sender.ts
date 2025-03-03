@@ -3,7 +3,7 @@
  * @author Yangholmes 2023-06-11
  */
 
-import {createTransport} from 'nodemailer';
+import { createTransport } from 'nodemailer';
 import Mail from 'nodemailer/lib/mailer';
 import SMTPPool from 'nodemailer/lib/smtp-pool';
 
@@ -12,6 +12,7 @@ interface Options {
   password: string;
   smtphost: string;
   smtpport: number;
+  proxy?: string;
 }
 
 export class EmialSender {
@@ -28,7 +29,8 @@ export class EmialSender {
       user,
       password,
       smtphost,
-      smtpport
+      smtpport,
+      proxy
     } = options;
 
     const config: SMTPPool.Options = {
@@ -40,9 +42,22 @@ export class EmialSender {
         user,
         pass: password
       },
+      proxy
     };
 
     this.transport = createTransport(config);
+  }
+
+  public testTransport() {
+    return new Promise((resolve, reject) => {
+      this.transport.verify((error, success) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(success);
+        }
+      });
+    });
   }
 
   public send(

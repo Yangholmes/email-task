@@ -29,8 +29,8 @@ export class EmailListener extends EventEmitter {
       throw new Error('options is required!');
     }
     super();
-    this.imap = this._setupImap();
     this.options = options;
+    this.imap = this._setupImap();
   }
 
   private _setupImap() {
@@ -40,8 +40,9 @@ export class EmailListener extends EventEmitter {
       user,
       password,
       host,
-      port: Number.parseInt(port),
-      tls: true
+      port: Number.parseInt(port, 10),
+      tls: true,
+      tlsOptions: { rejectUnauthorized: false }
     });
     imap.on('ready', function () {
       self.emit('email receiver started!');
