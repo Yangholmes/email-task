@@ -21,6 +21,11 @@ const options = {
 
 const sendto = process.env.sendto || '';
 
+test('mail sender test', async () => {
+  const emailSender = new EmialSender(options);
+  await emailSender.testTransport();
+});
+
 test('task response', async () => {
   const emailSender = new EmialSender(options);
 

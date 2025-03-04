@@ -12,10 +12,15 @@
     "build:js": "node ./build.js",
     "build:types": "tsc -p tsconfig.json",
     "start": "node ./build.dev.js",
+    "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "test": "vitest",
     "coverage": "vitest run --coverage"
   },
+  "files": [
+    "dist/*.js",
+    "dist/*.d.ts"
+  ],
   "keywords": [
     "email"
   ],

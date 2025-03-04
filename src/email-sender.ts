@@ -33,7 +33,9 @@ export class EmialSender {
       proxy
     } = options;
 
-    const config: SMTPPool.Options = {
+    const config: SMTPPool.Options & {
+      proxy?: string;
+    } = {
       pool: true,
       host: smtphost,
       port: smtpport,
