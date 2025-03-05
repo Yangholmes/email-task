@@ -5,7 +5,7 @@
 
 import * as esbuild from 'esbuild';
 
-await esbuild.build({
+const result = await esbuild.build({
   entryPoints: ['src/index.ts'],
   bundle: true,
   outfile: 'dist/index.js',
@@ -17,5 +17,15 @@ await esbuild.build({
   },
   alias: {
     '@': './src'
-  }
+  },
+  // optimization
+  drop: ['console', 'debugger'],
+  minify: true,
+  treeShaking: true,
+
+  metafile: true,
 });
+
+console.log(await esbuild.analyzeMetafile(result.metafile, {
+  verbose: true,
+}));

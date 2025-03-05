@@ -2,10 +2,16 @@
  * @file 邮件接受监听
  * @author Yangholmes 2023-05-28
  */
+import { Attachment } from 'mailparser';
 import { EventEmitter } from 'events';
+export interface ActionParams {
+    text: string;
+    html: string;
+    attachments: Attachment[];
+}
 export interface Command {
     command: string;
-    action: <T>(args: T) => boolean;
+    action: (params: ActionParams) => boolean;
 }
 interface Options {
     user: string;

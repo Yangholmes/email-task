@@ -4,13 +4,20 @@
  */
 
 import Imap from 'imap';
-import { simpleParser } from 'mailparser';
+import { Attachment, simpleParser } from 'mailparser';
 import { inspect } from 'util';
 import { EventEmitter } from 'events';
 
+
+export interface ActionParams {
+  text: string;
+  html: string;
+  attachments: Attachment[];
+}
+
 export interface Command {
   command: string;
-  action: <T>(args: T) => boolean;
+  action: (params: ActionParams) => boolean;
 }
 
 interface Options {
@@ -77,8 +84,8 @@ export class EmailListener extends EventEmitter {
                 simpleParser(buffer).then(res => {
                   // TODO: 处理收到的内容
                   console.log(res);
-                  const { subject: action, text } = res;
-                  action && self.emit(action, text);
+                  const { subject: action, text, html, attachments } = res;
+                  action && self.emit(action, { text, html, attachments });
                 });
               });
             });

@@ -5,7 +5,7 @@
 
 import { test, expect } from 'vitest';
 
-import { EmialSender } from '../src';
+import { EmialSender } from '../dist';
 
 import dotenv from 'dotenv';
 

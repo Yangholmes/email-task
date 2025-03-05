@@ -7,7 +7,7 @@ import { test } from 'vitest';
 
 import dotenv from 'dotenv';
 
-import { EmailListener } from '../src';
+import { EmailListener } from '../dist';
 
 function sleep(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
