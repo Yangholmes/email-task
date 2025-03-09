@@ -2,8 +2,8 @@
  * @file 邮件接受监听
  * @author Yangholmes 2023-05-28
  */
+import { EventEmitter } from 'node:events';
 import { Attachment } from 'mailparser';
-import { EventEmitter } from 'events';
 export interface ActionParams {
     text: string;
     html: string;
@@ -24,6 +24,9 @@ export declare class EmailListener extends EventEmitter {
     private readonly options;
     constructor(options: Options);
     private _setupImap;
+    private openInbox;
+    private fetchLatestEmails;
+    private parseEmail;
     start(): void;
     stop(): void;
     use(): void;
