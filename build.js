@@ -19,7 +19,10 @@ const result = await esbuild.build({
     '@': './src'
   },
   // optimization
-  drop: ['console', 'debugger'],
+  drop: [
+    // 'console',
+    'debugger'
+  ],
   minify: true,
   treeShaking: true,
 
