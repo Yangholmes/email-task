@@ -20,7 +20,7 @@ const result = await esbuild.build({
   },
   // optimization
   drop: [
-    // 'console',
+    'console',
     'debugger'
   ],
   minify: true,

@@ -11,6 +11,7 @@ import { Attachment, simpleParser } from 'mailparser';
 
 
 export interface ActionParams {
+  msgUid?: number;
   text: string;
   html: string;
   attachments: Attachment[];
@@ -18,7 +19,7 @@ export interface ActionParams {
 
 export interface Command {
   command: string;
-  action: (params: ActionParams) => boolean;
+  action: (params: ActionParams) => void;
 }
 
 interface Options {
@@ -31,6 +32,8 @@ interface Options {
 export class EmailListener extends EventEmitter {
   private readonly imap: Imap;
   private readonly options: Options;
+
+  private msgUidMap: Map<number, number> = new Map();
 
   constructor(options: Options) {
     if (!options) {
@@ -70,7 +73,7 @@ export class EmailListener extends EventEmitter {
 
   private openInbox() {
     const self = this;
-    self.imap.openBox('INBOX', true, (err, box) => {
+    self.imap.openBox('INBOX', false, (err, box) => {
       if (err) {
         console.error('打开邮箱失败:', err);
         throw err;
@@ -91,17 +94,22 @@ export class EmailListener extends EventEmitter {
 
     const fetch = self.imap.seq.fetch(fetchRange, {
       bodies: '',
-      // bodies: ['HEADER.FIELDS (SUBJECT)', 'TEXT'],
       struct: true,
       markSeen: true
     });
 
     fetch.on('message', (msg, seqno) => {
       console.log(`正在解析邮件 #${seqno}`);
+
       msg.on('body', (stream, info) => {
         console.log(`邮件内容类型: ${info.which}`);
         console.log(`邮件大小: ${info.size}`);
-        self.parseEmail(stream, info.size);
+        self.parseEmail(stream, info.size, seqno);
+      });
+
+      msg.on('attributes', (attrs) => {
+        const { uid } = attrs;
+        self.msgUidMap.set(seqno, uid);
       });
 
       msg.on('end', () => {
@@ -120,7 +128,7 @@ export class EmailListener extends EventEmitter {
     });
   }
 
-  private parseEmail(stream: NodeJS.ReadableStream, total: number) {
+  private parseEmail(stream: NodeJS.ReadableStream, total: number, seqno: number) {
     const self = this;
     let buffer = Buffer.alloc(total);
     let count = 0;
@@ -129,45 +137,21 @@ export class EmailListener extends EventEmitter {
       // TODO 处理长度超出异常
       chunk.copy(buffer, count);
       count += chunk.length;
-      console.log(`received ${count} bytes, total ${total} bytes`);
+      console.log(`received progress ${count/total}`);
     });
 
     stream.on('end', () => {
       console.log('邮件内容解析完成');
       simpleParser(buffer).then((res) => {
         const { subject: action, text, html, attachments } = res;
-        console.log(`收到事件: ${action}`);
-        action && self.emit(action, { text, html, attachments });
+        const msgUid = self.msgUidMap.get(seqno);
+        action && self.emit(action, { msgUid, text, html, attachments });
+        self.msgUidMap.delete(seqno);
       });
     });
     stream.on('error', (err) => {
       console.error(err);
     });
-
-    // const parser = new MailParser();
-    // let emailData: ActionParams = {
-    //   text: '', html: '', attachments: []
-    // }
-    // ;
-
-    // parser.on('data', (data) => {
-    //   console.log(data);
-    //   if (data.type === 'text') {
-    //     emailData.text = data.text;
-    //     emailData.html = data.html;
-    //   }
-    //   if (data.type === 'attachment') {
-    //     emailData.attachments.push(data);
-    //   }
-    // });
-
-    // parser.on('end', () => {
-    //   console.log('邮件解析完成');
-    //   // TODO
-    //   console.log(emailData);
-    // });
-
-    // stream.pipe(parser);
   }
 
   public start() {
@@ -176,10 +160,27 @@ export class EmailListener extends EventEmitter {
 
   public stop() {
     this.imap.end();
+    this.msgUidMap.clear();
   }
 
   public use() {
     // TODO: 实现中间件
+  }
+
+  /**
+   * 标记邮件为已读
+   * @param msgUid 邮件uid
+   */
+  public markAsRead(msgUid: number) {
+    return new Promise<boolean>((resolve, reject) => {
+      this.imap.seq.addFlags(msgUid, '\\Seen', (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(true);
+        }
+      });
+    });
   }
 
   public useCmds(cmds: Command[]) {
