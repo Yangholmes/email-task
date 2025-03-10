@@ -1,7 +1,12 @@
 {
   "name": "email-task",
-  "version": "1.1.2",
-  "description": "",
+  "version": "1.2.2",
+  "description": "基于邮件的任务分发服务",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Yangholmes/email-task.git"
+  },
+  "homepage": "https://github.com/Yangholmes/email-task",
   "main": "dist/index.js",
   "type": "module",
   "engines": {
@@ -25,7 +30,7 @@
     "email"
   ],
   "author": "Yangholmes",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "imap": "^0.8.19",
     "mailparser": "^3.6.4",
