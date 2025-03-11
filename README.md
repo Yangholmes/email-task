@@ -2,6 +2,8 @@
 
 用来监听邮件，并根据邮件内容执行任务的服务，同时具有邮件发送功能，支持 imap 和 smtp 协议。
 
+[![codecov](https://codecov.io/gh/Yangholmes/email-task/graph/badge.svg?token=OX1UPFEP7I)](https://codecov.io/gh/Yangholmes/email-task)
+
 ## 简介
 
 这个项目的起因是我想不在家的时候控制家里的一些设备，这就需要一个公网 IP ，或者做一下内网穿透。但是当地网络运营商不给我分配一个固定的公网 IP ，购买一个云服务器只是为了控制一下家里的几个小电器不怎么划算，最终便想到了使用电子邮箱的 imap 来做这个伺服。

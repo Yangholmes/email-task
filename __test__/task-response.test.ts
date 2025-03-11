@@ -5,7 +5,7 @@
 
 import { test, expect } from 'vitest';
 
-import { EmialSender } from '../dist';
+import { EmialSender } from '../src/email-sender';
 
 import dotenv from 'dotenv';
 
@@ -21,9 +21,15 @@ const options = {
 
 const sendto = process.env.sendto || '';
 
+test('initial error', () => {
+  // @ts-ignore
+  expect(() => new EmialSender()).toThrowError('options is required!');
+});
+
 test('mail sender test', async () => {
   const emailSender = new EmialSender(options);
-  await emailSender.testTransport();
+  const result = await emailSender.testTransport();
+  expect(result).toBe(true);
 });
 
 test('task response', async () => {
@@ -31,6 +37,5 @@ test('task response', async () => {
 
   const r = await emailSender.send('test', sendto, 'task response from testcase', 'hello world!', '<p>hello world!</p>');
 
-  expect(r);
-
+  expect(r.accepted).toContain(sendto);
 });

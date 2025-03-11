@@ -10,6 +10,7 @@ export default defineConfig({
     coverage: {
       provider: 'istanbul', // or 'v8'
       include: ['src/**/*.{js,ts}'],
+      reporter: ['json', 'html', 'text'],
     },
     testTimeout: 10e3
   },
