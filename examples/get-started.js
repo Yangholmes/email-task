@@ -16,11 +16,14 @@ const options = {
   password: process.env.password || '',
 };
 
-const listener = new EmailListener(options);
+const listener = new EmailListener(
+  // email server options
+  options,
+  // whether fetch all unread emails when initialization
+  true
+);
 
-/**
- * send email to the email box, setting email subject as 'test-task', will receive the email and fire 'test-task' event, then run the action function.
- */
+// send email to the email box, setting email subject as 'test-task', will receive the email and fire 'test-task' event, then run the action function.
 listener.useCmds([
   {
     command: 'test-task',

@@ -4,20 +4,10 @@
  */
 
 import * as esbuild from 'esbuild';
+import { baseConfig } from './build.config.base.js';
 
 const result = await esbuild.build({
-  entryPoints: ['src/index.ts'],
-  bundle: true,
-  outfile: 'dist/index.js',
-  platform: 'node',
-  format: 'esm',
-  packages: 'external',
-  loader: {
-    '.env': 'text'
-  },
-  alias: {
-    '@': './src'
-  },
+  ...baseConfig,
   // optimization
   drop: [
     'console',

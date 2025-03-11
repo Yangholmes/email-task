@@ -13,7 +13,9 @@
     "node": ">=22"
   },
   "scripts": {
+    "build:dev": "pnpm build:js:dev && pnpm build:types",
     "build": "pnpm build:js && pnpm build:types",
+    "build:js:dev": "node ./build.dev.js",
     "build:js": "node ./build.js",
     "build:types": "tsc -p tsconfig.json",
     "start": "node ./build.dev.js",

@@ -22,21 +22,35 @@ interface Options {
 }
 export declare class EmailListener extends EventEmitter {
     private readonly imap;
+    /** email 服务器配置 */
     private readonly options;
+    /** 邮件序列-邮件 id 映射 */
     private msgUidMap;
-    constructor(options: Options);
+    private readonly fetchUnread;
+    /**
+     * 邮件监听器
+     * @param options email 服务器配置
+     * @param fetchUnread 实例化时是否立即拉取所有未读邮件
+     */
+    constructor(options: Options, fetchUnread?: boolean);
     private _setupImap;
     private openInbox;
+    private fetchUnreadEmails;
     private fetchLatestEmails;
+    private fetchEmails;
     private parseEmail;
+    /** 开启服务 */
     start(): void;
+    /** 停止服务 */
     stop(): void;
+    /** 注册中间件 (未完成) */
     use(): void;
     /**
      * 标记邮件为已读
      * @param msgUid 邮件uid
      */
     markAsRead(msgUid: number): Promise<boolean>;
+    /** 注册命令 */
     useCmds(cmds: Command[]): void;
 }
 export {};

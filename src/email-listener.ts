@@ -31,16 +31,27 @@ interface Options {
 
 export class EmailListener extends EventEmitter {
   private readonly imap: Imap;
+  /** email 服务器配置 */
   private readonly options: Options;
-
+  /** 邮件序列-邮件 id 映射 */
   private msgUidMap: Map<number, number> = new Map();
+  private readonly fetchUnread: boolean = false;
 
-  constructor(options: Options) {
+  /**
+   * 邮件监听器
+   * @param options email 服务器配置
+   * @param fetchUnread 实例化时是否立即拉取所有未读邮件
+   */
+  constructor(
+    options: Options,
+    fetchUnread = false
+  ) {
     if (!options) {
       throw new Error('options is required!');
     }
     super();
     this.options = options;
+    this.fetchUnread = fetchUnread;
     this.imap = this._setupImap();
   }
 
@@ -79,6 +90,10 @@ export class EmailListener extends EventEmitter {
         throw err;
       }
 
+      if (self.fetchUnread) {
+        self.fetchUnreadEmails();
+      }
+
       console.log('listening...');
       self.imap.on('mail', (msgCounts: number) => {
         console.log(`收到新邮件: ${msgCounts}`);
@@ -87,11 +102,27 @@ export class EmailListener extends EventEmitter {
     });
   }
 
+  private fetchUnreadEmails() {
+    const self = this;
+    self.imap.search(['UNSEEN'], (err, results) => {
+      if (err) {
+        console.error(err);
+        throw err;
+      }
+      console.log(`未读邮件数量: ${results?.length}`);
+      results?.length && self.fetchEmails(results);
+    });
+  }
+
   private fetchLatestEmails(box: Imap.Box, msgCounts: number) {
     const self = this;
     const totalCounts = box.messages.total;
     const fetchRange = `${Math.max(1, totalCounts - msgCounts + 1)}:${totalCounts}`;
+    self.fetchEmails(fetchRange);
+  }
 
+  private fetchEmails(fetchRange: string | number[]) {
+    const self = this;
     const fetch = self.imap.seq.fetch(fetchRange, {
       bodies: '',
       struct: true,
@@ -137,7 +168,7 @@ export class EmailListener extends EventEmitter {
       // TODO 处理长度超出异常
       chunk.copy(buffer, count);
       count += chunk.length;
-      console.log(`received progress ${count/total}`);
+      console.log(`received progress ${(count / total * 1e2).toFixed(2)}%`);
     });
 
     stream.on('end', () => {
@@ -154,15 +185,18 @@ export class EmailListener extends EventEmitter {
     });
   }
 
+  /** 开启服务 */
   public start() {
     this.imap.connect();
   }
 
+  /** 停止服务 */
   public stop() {
     this.imap.end();
     this.msgUidMap.clear();
   }
 
+  /** 注册中间件 (未完成) */
   public use() {
     // TODO: 实现中间件
   }
@@ -183,6 +217,7 @@ export class EmailListener extends EventEmitter {
     });
   }
 
+  /** 注册命令 */
   public useCmds(cmds: Command[]) {
     const self = this;
     cmds.forEach(cmd => {
