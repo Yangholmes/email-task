@@ -12,6 +12,7 @@ import { Attachment, simpleParser } from 'mailparser';
 
 export interface ActionParams {
   msgUid?: number;
+  from?: string | string[];
   text: string;
   html: string;
   attachments: Attachment[];
@@ -174,9 +175,10 @@ export class EmailListener extends EventEmitter {
     stream.on('end', () => {
       console.log('邮件内容解析完成');
       simpleParser(buffer).then((res) => {
-        const { subject: action, text, html, attachments } = res;
+        const { subject: action, text, html, attachments, from: fromObject } = res;
+        const from = fromObject?.value.map(e => e.address).filter(Boolean);
         const msgUid = self.msgUidMap.get(seqno);
-        action && self.emit(action, { msgUid, text, html, attachments });
+        action && self.emit(action, { msgUid, text, html, attachments, from } as ActionParams);
         self.msgUidMap.delete(seqno);
       });
     });

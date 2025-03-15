@@ -13,6 +13,6 @@ export declare class EmialSender {
     private readonly transport;
     constructor(options: Options);
     testTransport(): Promise<unknown>;
-    send(from: string, to: string, subject: string, text?: string, html?: string): Promise<any>;
+    send(from: string, to: string | string[], subject: string, text?: string, html?: string): Promise<any>;
 }
 export {};
