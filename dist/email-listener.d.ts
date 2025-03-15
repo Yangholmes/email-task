@@ -6,6 +6,7 @@ import { EventEmitter } from 'node:events';
 import { Attachment } from 'mailparser';
 export interface ActionParams {
     msgUid?: number;
+    from?: string | string[];
     text: string;
     html: string;
     attachments: Attachment[];
