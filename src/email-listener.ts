@@ -31,12 +31,15 @@ interface Options {
 }
 
 export class EmailListener extends EventEmitter {
-  private readonly imap: Imap;
+  private imap: Imap;
   /** email 服务器配置 */
   private readonly options: Options;
+
   /** 邮件序列-邮件 id 映射 */
   private msgUidMap: Map<number, number> = new Map();
   private readonly fetchUnread: boolean = false;
+  /** 服务异常自动重启次数 */
+  private retryTimes = 3;
 
   /**
    * 邮件监听器
@@ -65,7 +68,11 @@ export class EmailListener extends EventEmitter {
       host,
       port: Number.parseInt(port, 10),
       tls: true,
-      tlsOptions: { rejectUnauthorized: false }
+      tlsOptions: { rejectUnauthorized: false },
+      keepalive: {
+        forceNoop: true,
+      },
+      // debug: console.debug,
     });
 
     imap.on('ready', () => {
@@ -76,6 +83,12 @@ export class EmailListener extends EventEmitter {
 
     imap.on('error', (err: Error) => {
       console.error('IMAP连接错误:', err);
+      if (self.retryTimes > 0) {
+        self.retryTimes--;
+        imap.destroy();
+        console.log(`[${self.retryTimes}] 尝试重新连接...`);
+        self.imap = self._setupImap(); // 重新连接
+      }
     });
 
     imap.on('log', console.log);
@@ -90,6 +103,8 @@ export class EmailListener extends EventEmitter {
         console.error('打开邮箱失败:', err);
         throw err;
       }
+
+      self.retryTimes = 3; // 重置重试次数
 
       if (self.fetchUnread) {
         self.fetchUnreadEmails();
@@ -195,7 +210,9 @@ export class EmailListener extends EventEmitter {
   /** 停止服务 */
   public stop() {
     this.imap.end();
+    this.imap.destroy();
     this.msgUidMap.clear();
+    console.log('邮件服务已停止');
   }
 
   /** 注册中间件 (未完成) */
@@ -225,6 +242,11 @@ export class EmailListener extends EventEmitter {
     cmds.forEach(cmd => {
       self.on(cmd.command, cmd.action);
     });
+  }
+
+  /** 输出日志到控制台 */
+  private log() {
+    // TODO: 实现日志输出
   }
 
 }

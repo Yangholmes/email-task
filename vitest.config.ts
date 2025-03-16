@@ -12,6 +12,6 @@ export default defineConfig({
       include: ['src/**/*.{js,ts}'],
       reporter: ['json', 'html', 'text'],
     },
-    testTimeout: 10e3
+    testTimeout: 1 * 60 * 1e3
   },
 });

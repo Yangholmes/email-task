@@ -22,12 +22,14 @@ interface Options {
     port: string;
 }
 export declare class EmailListener extends EventEmitter {
-    private readonly imap;
+    private imap;
     /** email 服务器配置 */
     private readonly options;
     /** 邮件序列-邮件 id 映射 */
     private msgUidMap;
     private readonly fetchUnread;
+    /** 服务异常自动重启次数 */
+    private retryTimes;
     /**
      * 邮件监听器
      * @param options email 服务器配置
@@ -53,5 +55,7 @@ export declare class EmailListener extends EventEmitter {
     markAsRead(msgUid: number): Promise<boolean>;
     /** 注册命令 */
     useCmds(cmds: Command[]): void;
+    /** 输出日志到控制台 */
+    private log;
 }
 export {};

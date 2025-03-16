@@ -16,7 +16,7 @@ const options = {
   smtpport: Number.parseInt(process.env.smtpport || '', 10),
   user: process.env.user || '',
   password: process.env.password || '',
-  proxy: process.env.proxy || '',
+  proxy: process.env.proxy || undefined,
 };
 
 const sendto = process.env.sendto || '';
@@ -35,7 +35,7 @@ test('mail sender test', async () => {
 test('task response', async () => {
   const emailSender = new EmialSender(options);
 
-  const r = await emailSender.send('test', sendto, 'task response from testcase', 'hello world!', '<p>hello world!</p>');
+  const r = await emailSender.send('test', [sendto], 'task response from testcase', 'hello world!', '<p>hello world!</p>');
 
   expect(r.accepted).toContain(sendto);
 });
